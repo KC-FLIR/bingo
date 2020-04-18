@@ -3,6 +3,10 @@
 import cv2
 import numpy as np
 
+# seed the pseudorandom number generator
+from random import seed
+from random import randint as randomint
+
 
 def blank_balls(width, height, rgb_colour=(0, 0, 0)):
     """Create new image(numpy array) filled with certain color in RGB"""
@@ -44,10 +48,16 @@ def render_balls(image=None, numbertext=None):
     return image
 
 
-image = render_balls(numbertext='22')
-cv2.imshow('Test image', image)
-cv2.waitKey(5000)
+numbers2do = 90
+picked = []
+seed(1)
+while numbers2do > 0:
+    thisrando = randomint(1,90)
+    if thisrando not in picked:
+        picked.append(thisrando)
+        image = render_balls(numbertext='{}'.format(thisrando))
+        numbers2do -= 1
+        cv2.imshow('Test image', image)
+        cv2.waitKey(500)
+
 cv2.destroyAllWindows()
-
-exit(0)
-
