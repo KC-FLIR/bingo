@@ -48,6 +48,33 @@ def render_balls(image=None, numbertext=None):
     return image
 
 
+def render_sballs(image=None, numbertext=None):
+
+    size = 100
+    thickness = int(size/10)
+    radius = int ((size-(2*thickness)) / 2)
+    radius = int ((size-thickness) / 2)
+    centre = int (size / 2 )
+    fudge = int(centre/2)
+
+    if image is None:
+        image = blank_balls(size, size)
+
+    cv2.circle(image, (centre, centre), radius, (255, 255, 255), -1)
+    cv2.circle(image, (centre, centre), radius, (139, 0, 139), thickness)
+
+    if numbertext is not None:
+        font = cv2.FONT_HERSHEY_COMPLEX_SMALL 
+        org = ((int(size/3.3)),(int(size/1.7))) 
+        fontScale = 2
+        color = (0,0,0)
+        textthickness = int (thickness/2)
+        cv2.putText(image, numbertext, org, font,      fontScale, color, textthickness, cv2.LINE_AA) 
+
+
+    return image
+
+
 numbers2do = 90
 picked = []
 seed(1)
@@ -55,7 +82,7 @@ while numbers2do > 0:
     thisrando = randomint(1,90)
     if thisrando not in picked:
         picked.append(thisrando)
-        image = render_balls(numbertext='{}'.format(thisrando))
+        image = render_sballs(numbertext='{}'.format(thisrando))
         numbers2do -= 1
         cv2.imshow('Test image', image)
         cv2.waitKey(500)
