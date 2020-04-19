@@ -201,7 +201,7 @@ while numbersDone < numbers2do:
         box.show()
 
         numbersDone += 1
-        cv2.waitKey(2000)
+        cv2.waitKey(5000)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
