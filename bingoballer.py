@@ -179,59 +179,16 @@ class ballBox:
 
 
 
-def BigSheet(ballSize=100, padding=10, border=5):
-    boxWidth = (ballSize*11)+(padding*11)+(border*2)
-    image = blank_balls(boxWidth, boxWidth)
-    print("Big Box is: width {}  height {}".format(boxWidth,boxWidth))
-    cv2.rectangle(image, (0, 0), (boxWidth, boxWidth), (200, 200, 200), border)
-
-    return image
-
-def placeBall(boxImage=None,ballImage=None,index=0):
-    padding = 10
-    border = 5
-    ballSize = 100
-    row = int(index/10)
-    column = index - (row*10)
-    box_width = ballSize + (padding * 2)
-    box_x = border + (box_width * column)
-    box_y = border + (box_width * row)
-    ball_x = box_x + padding
-    ball_y = box_y + padding
-
-    print("Ball #{} Box({},{})  Ball({},{})".format(index, box_x, box_y, ball_x, ball_y))
-
-    cv2.rectangle(boxImage, (box_x, box_y), (box_x + box_width, box_y + box_width), (255, 10, 10), 1)
-
-    if ballImage is not None:
-        # https://stackoverflow.com/questions/14063070/overlay-a-smaller-image-on-a-larger-image-python-opencv
-        y1, y2 = ball_y, ball_y + ballImage.shape[0]
-        x1, x2 = ball_x, ball_x + ballImage.shape[1]
-
-        boxImage[y1:y2,x1:x2] = ballImage
-
-        #alpha_s = ballImage[:, :, 3] / 255.0
-        #alpha_l = 1.0 - alpha_s
-
-        #for c in range(0, 3):
-        #    boxImage[y1:y2, x1:x2, c] = (alpha_s * ballImage[:, :, c] +
-        #                      alpha_l * ballImage[y1:y2, x1:x2, c])
-    return boxImage
-
-
 box = ballBox()
 box.create()
 box.show()
 
 
-#box = BigSheet()
-#cv2.imshow('BallBox', box)
-
 
 numbers2do = 90
 numbersDone = 0
 picked = []
-#seed(1)
+
 while numbersDone < numbers2do:
     thisrando = randomint(1,90)
     if thisrando not in picked:
@@ -242,8 +199,6 @@ while numbersDone < numbers2do:
 
         box.placeBall(ballImage=image,index=numbersDone)
         box.show()
-        #box = placeBall(boxImage=box, ballImage=image, index=numbersDone)
-        #cv2.imshow('BallBox', box)
 
         numbersDone += 1
         cv2.waitKey(2000)
