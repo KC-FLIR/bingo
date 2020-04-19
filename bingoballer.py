@@ -12,8 +12,8 @@ ball_colours = [(128, 0, 0),
                 (0, 128, 0),
                 (77, 128, 0),
                 (0, 128, 77),
-                (0, 34, 200),
-                (34, 128, 200),
+                (23, 34, 200),
+                (94, 128, 200),
                 (34, 200, 100),
                 (200, 128, 200),
                 (255, 28, 144)
@@ -219,8 +219,13 @@ def placeBall(boxImage=None,ballImage=None,index=0):
     return boxImage
 
 
-box = BigSheet()
-cv2.imshow('BallBox', box)
+box = ballBox()
+box.create()
+box.show()
+
+
+#box = BigSheet()
+#cv2.imshow('BallBox', box)
 
 
 numbers2do = 90
@@ -233,10 +238,12 @@ while numbersDone < numbers2do:
         picked.append(thisrando)
         #print("Rando {}".format(thisrando))
         image = render_scballs(number=thisrando)
-        cv2.imshow('Test image', image)
+        #cv2.imshow('Test image', image)
 
-        box = placeBall(boxImage=box, ballImage=image, index=numbersDone)
-        cv2.imshow('BallBox', box)
+        box.placeBall(ballImage=image,index=numbersDone)
+        box.show()
+        #box = placeBall(boxImage=box, ballImage=image, index=numbersDone)
+        #cv2.imshow('BallBox', box)
 
         numbersDone += 1
         cv2.waitKey(2000)
