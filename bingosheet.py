@@ -134,11 +134,11 @@ class ballBox:
         self.name = name
     
     def create(self):
-        self.canvas_width = (self.ballsize*(self.columns+1))+(self.ballpadding*(self.columns+1))+(self.border*2)
-        self.canvas_height = (self.ballsize*(self.rows+1))+(self.ballpadding*(self.rows + 1))+(self.border*2)
-        #boxWidth = (ballSize*11)+(padding*11)+(border*2)
+        total_image_dimension = self.ballsize+(self.ballpadding*2) 
+        self.canvas_width = (total_image_dimension*self.columns)+(self.border*2)
+        self.canvas_height = (total_image_dimension*self.rows)+(self.border*2)
+        #print("Big Box is: (rows {}, cols {}) width {}  height {}".format(self.rows,self.columns,self.canvas_width, self.canvas_height))
         self.image = blank_balls(self.canvas_width, self.canvas_height)
-        print("Big Box is: width {}  height {}".format(self.canvas_width, self.canvas_height))
         cv2.rectangle(self.image, (0, 0), (self.canvas_width, self.canvas_height), (200, 200, 200), self.border)
 
         return self.image
@@ -147,7 +147,7 @@ class ballBox:
         self.create()
         if bgd is None:
             bgd = (10, 10, 200)
-        cv2.rectangle(self.image, (self.border, self.border), (self.canvas_width-(2*self.border), self.canvas_height-(2*self.border)), bgd,-1)
+        cv2.rectangle(self.image, (self.border, self.border), (self.canvas_width-(self.border), self.canvas_height-(self.border)), bgd,-1)
         return self.image
 
     def placeBall(self,ballImage=None,index=0):
@@ -162,7 +162,6 @@ class ballBox:
         ball_x = box_x + padding
         ball_y = box_y + padding
 
-        #print("Ball #{} Box({},{})  Ball({},{})".format(index, box_x, box_y, ball_x, ball_y))
 
         cv2.rectangle(self.image, (box_x, box_y), (box_x + box_width, box_y + box_width), (255, 10, 10), 1)
 
@@ -216,43 +215,40 @@ class bingoCard:
 
         ball = 0
         for row in range(0,self.cards_rows):
-            #print("\nROW ~{}".format(row))
             spots = getNumbers(self.cards_per_row, 0, (self.cards_columns-1))
             for balls in range(0, self.cards_per_row):
                 # slots for balls already picked
                 column = spots[balls]
                 index = (row*self.cards_columns)+column
-                print("ROW #{}  BALL#{}  POSITION#{}  (index#{})".format(row,balls,column,index))
                 image = render_scballs(number=selected[ball])
                 # Work out box number for placement
                 self.box.placeBall(ballImage=image, index=index)
-                #self.box.show()
-                # Next ball from out preselected list
+                # Next ball from our preselected list
                 ball += 1
         
     def show(self):
         self.box.show()
 
     def save(self):
-        #path = "\Users\ukkev\gitwork\BINGO\cards\{}.png".format(self.name)
-        #path = "/Users/ukkev/gitwork/BINGO/cards\{}.png".format(self.name)
         path = "cards/{}.png".format(self.name)
         result = cv2.imwrite(path,self.box.image)
 
 
 card = bingoCard()
-teamcount = {}
+teamcount = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 for item in range(0,2000):
+
     team = item % 10
-    if team not in teamcount:
-        teamcount[team] = 0
     teamcount[team] += 1
-    card.name = "Team-{0:2}_Card-{0:5}".format(team, teamcount[team])
+
+    ourname = "Team-{}_Card-{}".format(team, teamcount[team])
+    card.name = ourname
+
+
     card.create(team)
     card.genCard()
     #card.show()
     card.save()
     
-
 
 cv2.destroyAllWindows()
