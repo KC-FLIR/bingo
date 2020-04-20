@@ -185,6 +185,7 @@ box.show()
 
 
 
+
 numbers2do = 90
 numbersDone = 0
 picked = []
@@ -195,13 +196,14 @@ while numbersDone < numbers2do:
         picked.append(thisrando)
         #print("Rando {}".format(thisrando))
         image = render_scballs(number=thisrando)
-        #cv2.imshow('Test image', image)
+        cv2.imshow('Test image', image)
+        cv2.waitKey(0)
 
         box.placeBall(ballImage=image,index=numbersDone)
         box.show()
 
         numbersDone += 1
-        cv2.waitKey(0)
+        
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
