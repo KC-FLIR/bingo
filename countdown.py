@@ -41,12 +41,12 @@ class lettershelf(object):
 
 #        self.npa_shelf = np.asarray(self.shelfImage)
 #        self.npa_tile = np.asarray(self.tileImage)
-        self.npa_shelf = np.array(Image.open(self.shelf_file).resize((2000,300)))
-        self.npa_tile = np.array(Image.open(self.blank_file).resize((200,200)))
+        self.npa_shelf = np.array(Image.open(self.shelf_file).resize((2000,400)))
+        self.npa_tile = np.array(Image.open(self.blank_file).resize((160,160)))
         print("Shelf size {}".format(self.npa_shelf.shape))
         print("tile size {}".format(self.npa_tile.shape))
         cv2.imshow("shelf", self.npa_shelf)
-        cv2.imshow("tile", self.npa_tile)
+        #cv2.imshow("tile", self.npa_tile)
         #return image
 
     def letter(self,charr):
@@ -56,10 +56,13 @@ class lettershelf(object):
 
         font = cv2.FONT_HERSHEY_SIMPLEX 
         #org = ((int(size/3.3)),(int(size/1.7))) 
-        fontScale = 2
+        fontScale = 6
         color = (5,50,1)
-        thickness = 10
-        cv2.putText(thisimage, charr, (100,50), font,   fontScale, color, thickness, cv2.LINE_AA) 
+        thickness = 20
+        tile_height = thisimage.shape[0]
+        tile_width = thisimage.shape[1]
+        # destination, char, (x,y (from top))
+        cv2.putText(thisimage, charr, (int (thickness/2),(tile_height - thickness)), font,   fontScale, color, thickness, cv2.LINE_AA) 
         print("LETTER: image size {}\n\n".format(thisimage.shape))
         return thisimage
 
@@ -74,20 +77,7 @@ class lettershelf(object):
 
         return binimage
 
-    def letter2(self,charr):
-        thisimage = self.blank_tile()
-        print("\n\nLETTER: image size {}".format(thisimage.shape))
-        print("LETTER: tile size {}".format(self.npa_tile.shape))
-
-        font = cv2.FONT_HERSHEY_SIMPLEX 
-        #org = ((int(size/3.3)),(int(size/1.7))) 
-        fontScale = 2
-        color = (5,50,1)
-        thickness = 10
-        cv2.putText(thisimage, charr, (100,50), font,   fontScale, color, thickness, cv2.LINE_AA) 
-        print("LETTER2: image size {}\n\n".format(thisimage.shape))
-        return thisimage
-
+   
 
     def addtoshelf(self,letter):
         image = self.letter(letter)
@@ -106,18 +96,17 @@ class lettershelf(object):
         #print("Ball #{} Box({},{})  Ball({},{})".format(index, box_x, box_y, ball_x, ball_y))
 
         #cv2.rectangle(self.image, (box_x, box_y), (box_x + box_width, box_y + box_width), (255, 10, 10), 1)
-        x_on_shelf = border+ self.letters * (image.shape[1]+padding)
+        x_on_shelf = 200 + (self.letters * (image.shape[1]+padding))
 
-        y1, y2 = ball_y, ball_y + image.shape[0]
-        x1, x2 = ball_x, ball_x + image.shape[1]
+       
         # https://stackoverflow.com/questions/14063070/overlay-a-smaller-image-on-a-larger-image-python-opencv
         #y1, y2 = image.shape[0],image.shape[0]
         #x1, x2 = image.shape[1],image.shape[1]
 
         print("ADD2SHELF: Shelf size {}".format(self.npa_shelf.shape))
-        print("ADD2SHELF: tile size {}".format(image.shape))
+        print("ADD2SHELF: image size {}".format(image.shape))
 
-        y_on_shelf=50
+        y_on_shelf=40
 
         print("ADD2SHELF: y from {} y to {}".format(y_on_shelf,y_on_shelf+image.shape[0]))
         print("ADD2SHELF: x from {} x to {}".format(x_on_shelf,x_on_shelf+image.shape[1]))
@@ -126,7 +115,7 @@ class lettershelf(object):
         alpha_s = image[:, :, 2] / 255.0
         alpha_l = 1.0 - alpha_s
 
-        self.npa_shelf[y_on_shelf:y_on_shelf+image.shape[0],x_on_shelf,x_on_shelf+image.shape[1]] = image
+        self.npa_shelf[y_on_shelf:y_on_shelf+image.shape[0],x_on_shelf:x_on_shelf+image.shape[1]] = image
 
         #alpha_s = ballImage[:, :, 3] / 255.0
         #alpha_l = 1.0 - alpha_s
@@ -142,8 +131,8 @@ class lettershelf(object):
 
 
 
-consonants = "AEIOU"
-vowels = "BCDFGHJKLMNPQRSTVWXYZ"
+vowels = "AEIOU"
+consonants = "BCDFGHJKLMNPQRSTVWXYZ"
 alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     
 
@@ -168,7 +157,7 @@ while lcount > 0:
             letter=consonants[random.randint(0,len(consonants)-1)]
     if letter is not None:
         print("{} ".format(letter), end="")
-        quiz = "()()".format(quiz,letter)
+        quiz = "{}{}".format(quiz,letter)
         lcount -= 1
     
 print("\n{}\n".format(quiz))
@@ -177,12 +166,16 @@ print("\n{}\n".format(quiz))
 
 
 hewer = lettershelf()
-for i, v in enumerate(vowels):
+#for i, v in enumerate(vowels):
+for i, v in enumerate(quiz):
     hewer.addtoshelf(v)
     hewer.show()
 
+cv2.waitKey(0)
+
 exit(0)
 
+import ballbox
 
 box = ballBox()
 box.create()
