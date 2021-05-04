@@ -1,187 +1,194 @@
-# bingoballer.py
+# countdown.py
 # https://techtutorialsx.com/2018/07/08/python-opencv-drawing-circles/
+# must have 3 vowels and four consonants, then two of either
 import cv2
 import numpy as np
-
-# seed the pseudorandom number generator
-from random import seed
-from random import randint as randomint
-
-ball_colours = [(128, 0, 0),
-                (128, 128, 0),
-                (0, 128, 0),
-                (77, 128, 0),
-                (0, 128, 77),
-                (23, 34, 200),
-                (94, 128, 200),
-                (34, 200, 100),
-                (200, 128, 200),
-                (255, 28, 144)
-                ]
-
-def blank_balls(width, height, rgb_colour=(0, 0, 0)):
-    """Create new image(numpy array) filled with certain color in RGB"""
-    # Create black blank image
-    image = np.zeros((height, width, 3), np.uint8)
-
-    # Since OpenCV uses BGR, convert the color first
-    color = tuple(reversed(rgb_colour))
-    # Fill image with color
-    image[:] = color
-
-    return image
+import PIL
+from PIL import Image
+import random
+print('Pillow Version:', PIL.__version__)
 
 
-def render_balls(image=None, numbertext=None):
-
-    size = 200
-    thickness = 20
-    radius = int ((size-(2*thickness)) / 2)
-    radius = int ((size-thickness) / 2)
-    centre = int (size / 2 )
-    fudge = int(centre/2)
-
-    if image is None:
-        image = blank_balls(size, size)
-
-    cv2.circle(image, (centre, centre), radius, (255, 255, 255), -1)
-    cv2.circle(image, (centre, centre), radius, (139, 0, 139), thickness)
-
-    if numbertext is not None:
-        font = cv2.FONT_HERSHEY_SIMPLEX 
-        org = ((int(size/3.3)),(int(size/1.7))) 
-        fontScale = 2
-        color = (0,0,0)
-        thickness = 10
-        cv2.putText(image, numbertext, org, font,      fontScale, color, thickness, cv2.LINE_AA) 
 
 
-    return image
 
-
-def render_sballs(image=None, numbertext=None):
-
-    size = 100
-    thickness = int(size/10)
-    radius = int ((size-thickness) / 2)
-    centre = int (size / 2 )
-    
-    if image is None:
-        image = blank_balls(size, size)
-
-    cv2.circle(image, (centre, centre), radius, (255, 255, 255), -1)
-    cv2.circle(image, (centre, centre), radius, (139, 0, 139), thickness)
-
-    if numbertext is not None:
-        font = cv2.FONT_HERSHEY_COMPLEX_SMALL 
-        org = ((int(size/3.5)),(int(size/1.7))) 
-        fontScale = 2
-        color = (0,0,0)
-        textthickness = int (thickness/2)
-        cv2.putText(image, numbertext, org, font,      fontScale, color, textthickness, cv2.LINE_AA) 
-
-
-    return image
-
-def render_scballs(image=None, number=None):
-
-    size = 100
-    thickness = int(size/10)
-    radius = int ((size-thickness) / 2)
-    centre = int (size / 2 )
-    ThisBallColour = ball_colours[0]
-
-    if number is not None:
-        colour_index = int(number/10)
-        #print("Balls please :{} colour index {}".format(number,colour_index))
-        ThisBallColour = ball_colours[colour_index]
-    
-    if image is None:
-        image = blank_balls(size, size)
-
-    cv2.circle(image, (centre, centre), radius, (255, 255, 255), -1)
-    #cv2.circle(image, (centre, centre), radius, (139, 0, 139), thickness)
-    cv2.circle(image, (centre, centre), radius, ThisBallColour, thickness)
-
-    if number is not None:
-        font = cv2.FONT_HERSHEY_COMPLEX_SMALL 
-        y = int(size/1.63)
-        if number<10:
-            x = int(size/2.8)
-        else:
-            x = int(size/3.8)
-        
-        org = (x,y) 
-        fontScale = 2
-        color = (0,0,0)
-        textthickness = int (thickness/2)
-        cv2.putText(image, "{}".format(number), org, font,      fontScale, color, textthickness, cv2.LINE_AA) 
-
-    return image
-
-
-class ballBox:
-    name = "defaultbox"
-    rows = 9
-    columns = 10
-    border = 5
-    ballpadding = 10
-    ballsize = 100
+class lettershelf(object):
+    shelf_file="images/scrabble-rest.jpg"
+    blank_file="images/scrabble-tile.jpg"
+    screen = None
     image = None
-    canvas_width = None
+    tile = None
+    height = 200
+    width = 2000
+    rgb_black=(0, 0, 0)
+    shelfImage = Image.open(shelf_file)
+    tileImage = Image.open(blank_file)
+    npa_shelf = None
+    npa_tile = None
+    letters = 0
+    ballpadding = 0 #= 10
+    ballsize = 200    
 
-    def __init__(self, name=None):
-        self.name = name
-    
+    def __init__(self):
+        self.image = np.zeros((self.height, self.width, 3), np.uint8)
+        self.tile = np.zeros((200, 200, 3), np.uint8)
 
-    def create(self):
-        total_image_dimension = self.ballsize+(self.ballpadding*2) 
-        self.canvas_width = (total_image_dimension*self.columns)+(self.border*2)
-        self.canvas_height = (total_image_dimension*self.rows)+(self.border*2)
-        #print("Big Box is: (rows {}, cols {}) width {}  height {}".format(self.rows,self.columns,self.canvas_width, self.canvas_height))
-        self.image = blank_balls(self.canvas_width, self.canvas_height)
-        cv2.rectangle(self.image, (0, 0), (self.canvas_width, self.canvas_height), (200, 200, 200), self.border)
-        return self.image
+        # Since OpenCV uses BGR, convert the color first
+        color = tuple(reversed(self.rgb_black))
+        # Fill image with color
+        self.image[:] = color
+        self.tile[:] = color
 
-    def placeBall(self,ballImage=None,index=0):
+#        self.npa_shelf = np.asarray(self.shelfImage)
+#        self.npa_tile = np.asarray(self.tileImage)
+        self.npa_shelf = np.array(Image.open(self.shelf_file).resize((2000,300)))
+        self.npa_tile = np.array(Image.open(self.blank_file).resize((200,200)))
+        print("Shelf size {}".format(self.npa_shelf.shape))
+        print("tile size {}".format(self.npa_tile.shape))
+        cv2.imshow("shelf", self.npa_shelf)
+        cv2.imshow("tile", self.npa_tile)
+        #return image
+
+    def letter(self,charr):
+        thisimage = np.array(self.npa_tile)
+        print("\n\nLETTER: image size {}".format(thisimage.shape))
+        print("LETTER: tile size {}".format(self.npa_tile.shape))
+
+        font = cv2.FONT_HERSHEY_SIMPLEX 
+        #org = ((int(size/3.3)),(int(size/1.7))) 
+        fontScale = 2
+        color = (5,50,1)
+        thickness = 10
+        cv2.putText(thisimage, charr, (100,50), font,   fontScale, color, thickness, cv2.LINE_AA) 
+        print("LETTER: image size {}\n\n".format(thisimage.shape))
+        return thisimage
+
+    def blank_tile(width=200, height=200, rgb_colour=(50, 50, 50)):
+        # Create black blank image
+        binimage = np.zeros((height, width, 3), np.uint8)
+
+        # Since OpenCV uses BGR, convert the color first
+        color = tuple(reversed(rgb_colour))
+        # Fill image with color
+        binimage[:] = color
+
+        return binimage
+
+    def letter2(self,charr):
+        thisimage = self.blank_tile()
+        print("\n\nLETTER: image size {}".format(thisimage.shape))
+        print("LETTER: tile size {}".format(self.npa_tile.shape))
+
+        font = cv2.FONT_HERSHEY_SIMPLEX 
+        #org = ((int(size/3.3)),(int(size/1.7))) 
+        fontScale = 2
+        color = (5,50,1)
+        thickness = 10
+        cv2.putText(thisimage, charr, (100,50), font,   fontScale, color, thickness, cv2.LINE_AA) 
+        print("LETTER2: image size {}\n\n".format(thisimage.shape))
+        return thisimage
+
+
+    def addtoshelf(self,letter):
+        image = self.letter(letter)
+
+        print("\n\nADD2SHELF: image size {}".format(image.shape))
         padding = self.ballpadding
-        border = self.border
+        border = 5
         ballSize = self.ballsize
-        row = int(index/self.columns)
-        column = index - (row*self.columns)
+        column = self.letters
         box_width = ballSize + (padding * 2)
         box_x = border + (box_width * column)
-        box_y = border + (box_width * row)
+        box_y = 100
         ball_x = box_x + padding
         ball_y = box_y + padding
 
         #print("Ball #{} Box({},{})  Ball({},{})".format(index, box_x, box_y, ball_x, ball_y))
 
-        cv2.rectangle(self.image, (box_x, box_y), (box_x + box_width, box_y + box_width), (255, 10, 10), 1)
+        #cv2.rectangle(self.image, (box_x, box_y), (box_x + box_width, box_y + box_width), (255, 10, 10), 1)
+        x_on_shelf = border+ self.letters * (image.shape[1]+padding)
 
-        if ballImage is not None:
-            # https://stackoverflow.com/questions/14063070/overlay-a-smaller-image-on-a-larger-image-python-opencv
-            y1, y2 = ball_y, ball_y + ballImage.shape[0]
-            x1, x2 = ball_x, ball_x + ballImage.shape[1]
+        y1, y2 = ball_y, ball_y + image.shape[0]
+        x1, x2 = ball_x, ball_x + image.shape[1]
+        # https://stackoverflow.com/questions/14063070/overlay-a-smaller-image-on-a-larger-image-python-opencv
+        #y1, y2 = image.shape[0],image.shape[0]
+        #x1, x2 = image.shape[1],image.shape[1]
 
-            self.image[y1:y2,x1:x2] = ballImage
+        print("ADD2SHELF: Shelf size {}".format(self.npa_shelf.shape))
+        print("ADD2SHELF: tile size {}".format(image.shape))
 
-            #alpha_s = ballImage[:, :, 3] / 255.0
-            #alpha_l = 1.0 - alpha_s
+        y_on_shelf=50
 
-            #for c in range(0, 3):
-            #    boxImage[y1:y2, x1:x2, c] = (alpha_s * ballImage[:, :, c] +
-            #                      alpha_l * ballImage[y1:y2, x1:x2, c])
-        return self.image
+        print("ADD2SHELF: y from {} y to {}".format(y_on_shelf,y_on_shelf+image.shape[0]))
+        print("ADD2SHELF: x from {} x to {}".format(x_on_shelf,x_on_shelf+image.shape[1]))
+
+
+        alpha_s = image[:, :, 2] / 255.0
+        alpha_l = 1.0 - alpha_s
+
+        self.npa_shelf[y_on_shelf:y_on_shelf+image.shape[0],x_on_shelf,x_on_shelf+image.shape[1]] = image
+
+        #alpha_s = ballImage[:, :, 3] / 255.0
+        #alpha_l = 1.0 - alpha_s
+
+        #for c in range(0, 3):
+        #    boxImage[y1:y2, x1:x2, c] = (alpha_s * ballImage[:, :, c] +
+        #                      alpha_l * ballImage[y1:y2, x1:x2, c])
+        self.letters += 1
+        return self.npa_shelf
 
     def show(self):
-        cv2.imshow(self.name, self.image)
+        cv2.imshow("shelf", self.npa_shelf)
 
+
+
+consonants = "AEIOU"
+vowels = "BCDFGHJKLMNPQRSTVWXYZ"
+alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    
+
+
+vcount=3
+ccount=4
+lcount=9
+quiz=""
+while lcount > 0:
+    choice=random.randint(1,100)
+    letter = None
+    if choice>50 and vcount>0:
+        letter=vowels[random.randint(0,len(vowels)-1)]
+        vcount -= 1
+    if choice<50 and ccount>0:
+        letter=consonants[random.randint(0,len(consonants)-1)]
+        ccount -= 1
+    if letter is None and (vcount+ccount)<1:
+        if choice>50:
+            letter=vowels[random.randint(0,len(vowels)-1)]
+        else:
+            letter=consonants[random.randint(0,len(consonants)-1)]
+    if letter is not None:
+        print("{} ".format(letter), end="")
+        quiz = "()()".format(quiz,letter)
+        lcount -= 1
+    
+print("\n{}\n".format(quiz))
+#exit(0)
+
+
+
+hewer = lettershelf()
+for i, v in enumerate(vowels):
+    hewer.addtoshelf(v)
+    hewer.show()
+
+exit(0)
 
 
 box = ballBox()
 box.create()
 box.show()
+
+
 
 
 
