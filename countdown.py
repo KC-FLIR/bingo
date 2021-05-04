@@ -6,11 +6,19 @@ import numpy as np
 import PIL
 from PIL import Image
 import random
+import itertools as it
 print('Pillow Version:', PIL.__version__)
 
 
+class jiggleletters(object):
+    thisword = None 
+    perms = None
 
+    def __init__(self,word):
+        self.thisword = word
 
+    def gen_perms(self,letters):
+        return 
 
 class lettershelf(object):
     shelf_file="images/scrabble-rest.jpg"
@@ -26,7 +34,7 @@ class lettershelf(object):
     npa_shelf = None
     npa_tile = None
     letters = 0
-    ballpadding = 0 #= 10
+    ballpadding = 10 #= 10
     ballsize = 200    
 
     def __init__(self):
@@ -39,20 +47,23 @@ class lettershelf(object):
         self.image[:] = color
         self.tile[:] = color
 
-#        self.npa_shelf = np.asarray(self.shelfImage)
-#        self.npa_tile = np.asarray(self.tileImage)
         self.npa_shelf = np.array(Image.open(self.shelf_file).resize((2000,400)))
         self.npa_tile = np.array(Image.open(self.blank_file).resize((160,160)))
-        print("Shelf size {}".format(self.npa_shelf.shape))
-        print("tile size {}".format(self.npa_tile.shape))
+        ##print("Shelf size {}".format(self.npa_shelf.shape))
+        ##print("tile size {}".format(self.npa_tile.shape))
         cv2.imshow("shelf", self.npa_shelf)
-        #cv2.imshow("tile", self.npa_tile)
-        #return image
+
+    def white_to_transparency_gradient(img):
+        x = np.asarray(img.convert('RGBA')).copy()
+
+        x[:, :, 3] = (255 - x[:, :, :3].mean(axis=2)).astype(np.uint8)
+
+        return Image.fromarray(x)
 
     def letter(self,charr):
         thisimage = np.array(self.npa_tile)
-        print("\n\nLETTER: image size {}".format(thisimage.shape))
-        print("LETTER: tile size {}".format(self.npa_tile.shape))
+        ##print("\n\nLETTER: image size {}".format(thisimage.shape))
+        ##print("LETTER: tile size {}".format(self.npa_tile.shape))
 
         font = cv2.FONT_HERSHEY_SIMPLEX 
         #org = ((int(size/3.3)),(int(size/1.7))) 
@@ -63,7 +74,7 @@ class lettershelf(object):
         tile_width = thisimage.shape[1]
         # destination, char, (x,y (from top))
         cv2.putText(thisimage, charr, (int (thickness/2),(tile_height - thickness)), font,   fontScale, color, thickness, cv2.LINE_AA) 
-        print("LETTER: image size {}\n\n".format(thisimage.shape))
+        ##print("LETTER: image size {}\n\n".format(thisimage.shape))
         return thisimage
 
     def blank_tile(width=200, height=200, rgb_colour=(50, 50, 50)):
@@ -82,47 +93,29 @@ class lettershelf(object):
     def addtoshelf(self,letter):
         image = self.letter(letter)
 
-        print("\n\nADD2SHELF: image size {}".format(image.shape))
+        ##print("\n\nADD2SHELF: image size {}".format(image.shape))
         padding = self.ballpadding
-        border = 5
-        ballSize = self.ballsize
-        column = self.letters
-        box_width = ballSize + (padding * 2)
-        box_x = border + (box_width * column)
-        box_y = 100
-        ball_x = box_x + padding
-        ball_y = box_y + padding
 
-        #print("Ball #{} Box({},{})  Ball({},{})".format(index, box_x, box_y, ball_x, ball_y))
-
-        #cv2.rectangle(self.image, (box_x, box_y), (box_x + box_width, box_y + box_width), (255, 10, 10), 1)
         x_on_shelf = 200 + (self.letters * (image.shape[1]+padding))
 
        
         # https://stackoverflow.com/questions/14063070/overlay-a-smaller-image-on-a-larger-image-python-opencv
-        #y1, y2 = image.shape[0],image.shape[0]
-        #x1, x2 = image.shape[1],image.shape[1]
 
-        print("ADD2SHELF: Shelf size {}".format(self.npa_shelf.shape))
-        print("ADD2SHELF: image size {}".format(image.shape))
+        ##print("ADD2SHELF: Shelf size {}".format(self.npa_shelf.shape))
+        ##print("ADD2SHELF: image size {}".format(image.shape))
 
         y_on_shelf=40
 
-        print("ADD2SHELF: y from {} y to {}".format(y_on_shelf,y_on_shelf+image.shape[0]))
-        print("ADD2SHELF: x from {} x to {}".format(x_on_shelf,x_on_shelf+image.shape[1]))
+        ##print("ADD2SHELF: y from {} y to {}".format(y_on_shelf,y_on_shelf+image.shape[0]))
+        ##print("ADD2SHELF: x from {} x to {}".format(x_on_shelf,x_on_shelf+image.shape[1]))
 
 
-        alpha_s = image[:, :, 2] / 255.0
-        alpha_l = 1.0 - alpha_s
+
+        #print("Alpha? {}".format((255 - image[:, :, :3].mean(axis=2)).astype(np.uint8)))
+        #image[:, :, 3] = (255 - image[:, :, :3].mean(axis=2)).astype(np.uint8)
 
         self.npa_shelf[y_on_shelf:y_on_shelf+image.shape[0],x_on_shelf:x_on_shelf+image.shape[1]] = image
 
-        #alpha_s = ballImage[:, :, 3] / 255.0
-        #alpha_l = 1.0 - alpha_s
-
-        #for c in range(0, 3):
-        #    boxImage[y1:y2, x1:x2, c] = (alpha_s * ballImage[:, :, c] +
-        #                      alpha_l * ballImage[y1:y2, x1:x2, c])
         self.letters += 1
         return self.npa_shelf
 
@@ -171,39 +164,34 @@ for i, v in enumerate(quiz):
     hewer.addtoshelf(v)
     hewer.show()
 
+qlist = list(quiz)
+print("Quiz string is {} long".format(len(qlist)))
+bflist = []
+for plen in range(2,len(qlist)):
+    print("Generating perms of length : {}".format(plen))
+    perms = list(it.permutations(qlist,plen))
+    bflist = bflist + perms
+#perms = list(it.permutations(qlist))
+print("So thats {} combination".format(len(bflist)))
 cv2.waitKey(0)
+# Build dict
+pdict={}
+for perm in bflist:
+    string = "".join(perm)
+    if string not in pdict:
+        pdict[string] = 1
+print("So thats {} uniques".format(len(pdict)))
+    
+cv2.destroyAllWindows()
+with open('key-list.txt',"w") as outputfile:
+    for key in pdict:
+        outputfile.write("{}\n".format(key))
+
+
+with open('perms-list.txt',"w") as outputfile:
+    for perm in bflist:
+        string = "".join(perm)
+        outputfile.write("{}\n".format(string))
 
 exit(0)
 
-import ballbox
-
-box = ballBox()
-box.create()
-box.show()
-
-
-
-
-
-
-numbers2do = 90
-numbersDone = 0
-picked = []
-
-while numbersDone < numbers2do:
-    thisrando = randomint(1,90)
-    if thisrando not in picked:
-        picked.append(thisrando)
-        #print("Rando {}".format(thisrando))
-        image = render_scballs(number=thisrando)
-        cv2.imshow('Test image', image)
-        cv2.waitKey(0)
-
-        box.placeBall(ballImage=image,index=numbersDone)
-        box.show()
-
-        numbersDone += 1
-        
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
