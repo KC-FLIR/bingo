@@ -7,6 +7,7 @@ import PIL
 from PIL import Image
 import random
 import itertools as it
+import enchant 
 print('Pillow Version:', PIL.__version__)
 
 
@@ -173,7 +174,6 @@ for plen in range(2,len(qlist)):
     bflist = bflist + perms
 #perms = list(it.permutations(qlist))
 print("So thats {} combination".format(len(bflist)))
-cv2.waitKey(0)
 # Build dict
 pdict={}
 for perm in bflist:
@@ -182,16 +182,32 @@ for perm in bflist:
         pdict[string] = 1
 print("So thats {} uniques".format(len(pdict)))
     
-cv2.destroyAllWindows()
 with open('key-list.txt',"w") as outputfile:
     for key in pdict:
         outputfile.write("{}\n".format(key))
 
+valids={}
+d = enchant.Dict("en_GB")
+with open('good-list.txt',"w") as outputfile:
+    for key in pdict:
+        if d.check(key):
+            valids[key]=len(key)
+            outputfile.write("{}\n".format(key))
+# https://pyenchant.github.io/pyenchant/tutorial.html
+print("Good words {} ".format(len(valids)))
+for key in valids:
+    print("good: {}".format(key))
 
-with open('perms-list.txt',"w") as outputfile:
-    for perm in bflist:
-        string = "".join(perm)
-        outputfile.write("{}\n".format(string))
+
+
+#with open('perms-list.txt',"w") as outputfile:
+#    for perm in bflist:
+#        string = "".join(perm)
+#        outputfile.write("{}\n".format(string))
+
+cv2.waitKey(0)
+
+cv2.destroyAllWindows()
 
 exit(0)
 
