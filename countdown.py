@@ -182,12 +182,12 @@ while lcount > 0:
 # dump to terminal
 print("\n{}\n".format(quiz))
 
-
+cv2.startWindowThread()
 hewer = lettershelf()
 for i, v in enumerate(quiz):
     hewer.addtoshelf(v)
     hewer.show()
-
+cv2.waitKey(1)
 # First job is to generate all the permutaions of strings from 2 characters up to string length, from the character mix we've selected above
 qlist = list(quiz)
 print("Quiz string is {} long".format(len(qlist)))
